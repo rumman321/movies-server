@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 
 // middleware
@@ -42,6 +42,13 @@ async function run() {
        const movies = await movieCollection.find({}).maxTimeMS(60000).toArray();
         res.send(movies);})
 
+        app.delete("/movie/:id",async (req,res)=>{
+          const id=req.params.id
+          const query= {_id : new ObjectId(id)}
+          const result = await movieCollection.deleteOne(query)
+          res.send(result)
+        })    
+
     //favorite collection part
     app.post('/favorites', async (req,res)=>{
       const fav=req.body
@@ -53,7 +60,13 @@ async function run() {
     app.get("/favorites", async (req, res) => { 
       const movies = await favoriteCollection.find({}).maxTimeMS(60000).toArray();
        res.send(movies);})
-
+    
+    app.delete("/favorites/:id",async (req,res)=>{
+      const id=req.params.id
+      const query= { _id : id}
+      const result = await favoriteCollection.deleteOne(query)
+      res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
